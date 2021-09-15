@@ -16,17 +16,23 @@ class App extends Component {
 			searchfield:''
 		}
 	}
-
+fetchQuote(){
+	fetch('https://api.chucknorris.io/jokes/random')
+  .then((response) => response.json())
+  .then((quote) => {this.setState({quotes:quote})});
+}
 componentDidMount(){
 	fetch('https://jsonplaceholder.typicode.com/users')
   .then((response) => response.json())
   .then((users) => {this.setState({robots:users})});
-  fetch('https://api.chucknorris.io/jokes/random')
-  .then((response) => response.json())
-  .then((quote) => {this.setState({quotes:quote})});
-  // console.log(this.state.quotes);
+  this.fetchQuote();
+  this.interval = setInterval(() => {
+	this.fetchQuote()}, 10000);
 }
 
+componentWillUnmount() {
+	clearInterval(this.interval);
+  }
 
 onSearchChange = (event)=> {
 	this.setState({searchfield: event.target.value})
@@ -34,7 +40,7 @@ onSearchChange = (event)=> {
 
 
 render(){
-	const {robots,quotes, searchfield} = this.state;
+	const {robots,quotes,searchfield} = this.state;
 	const filteredRobots = robots.filter(robot => {
 		return robot.name.toLowerCase().includes(searchfield.toLowerCase())
 	})
