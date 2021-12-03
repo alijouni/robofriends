@@ -1,4 +1,4 @@
-import React,{Component} from 'react';
+import React,{useState,useEffect} from 'react';
 import CardList from '../components/CardList';
 import SearchBox from '../components/SearchBox';
 import Scroll from '../components/Scroll'
@@ -7,40 +7,41 @@ import ErrorBoundary from '../components/ErrorBoundary'
 import Quote from '../components/Quote'
 import './App.css'
 
-class App extends Component {
-	constructor(){
-		super()
-		this.state={
-			robots: [],
-			quotes:[],
-			searchfield:''
-		}
-	}
-fetchQuote(){
+function App() {
+
+	const [robots, setRobots] = useState([]);
+	const [searchfield, setSearchfield] = useState('');
+	const [quotes, setQuotes] = useState([]);
+	
+
+const fetchQuote=()=>{
 	fetch('https://api.chucknorris.io/jokes/random')
   .then((response) => response.json())
-  .then((quote) => {this.setState({quotes:quote})});
+  .then((quote) => {setQuotes(quote)});
 }
-componentDidMount(){
-	fetch('https://jsonplaceholder.typicode.com/users')
+	
+	useEffect(() => {
+		fetch('https://jsonplaceholder.typicode.com/users')
   .then((response) => response.json())
-  .then((users) => {this.setState({robots:users})});
-  this.fetchQuote();
-  this.interval = setInterval(() => {
-	this.fetchQuote()}, 10000);
+  .then((users) => {setRobots(users)});
+  
+	}, [])
+	
+	useEffect(() => {
+		const interval = setInterval(() => {
+			fetchQuote()
+		}, 10000);
+		fetchQuote();
+		return () => clearInterval(interval);
+	},[])
+
+
+const onSearchChange = (event)=> {
+	setSearchfield(event.target.value)
 }
 
-componentWillUnmount() {
-	clearInterval(this.interval);
-  }
-
-onSearchChange = (event)=> {
-	this.setState({searchfield: event.target.value})
-}
 
 
-render(){
-	const {robots,quotes,searchfield} = this.state;
 	const filteredRobots = robots.filter(robot => {
 		return robot.name.toLowerCase().includes(searchfield.toLowerCase())
 	})
@@ -49,7 +50,7 @@ render(){
 		(
 			<div className ='tc'>
 				<h1 className='f1'>RoboFriends</h1>
-				<SearchBox searchChange = {this.onSearchChange}/>
+				<SearchBox searchChange = {onSearchChange}/>
 				<Banner/>
 				<Quote quotes={quotes}/>
 				<Scroll>
@@ -63,7 +64,7 @@ render(){
 
 	);
 
-}
+
 
 }
 
